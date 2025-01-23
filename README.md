@@ -11,5 +11,6 @@ Flags:
       --data-dir=DATA-DIR        Data dir for storing downloaded from storage data
   -b, --bucket-ulid=BUCKET-ULID  Store bucket ULID as a string
   -l, --label-name=LABEL-NAME    If provided, all values for given label name will be printed, otherwise will print all label names
+  -s, --show-stat                Gather stat such as labels value count and size of all values in bytes
       --version                  Show application version.
 ```

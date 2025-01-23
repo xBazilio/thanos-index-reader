@@ -20,10 +20,11 @@ var (
 	datadir            = kingpin.Flag("data-dir", "Data dir for storing downloaded from storage data").Required().String()
 	bucketulid         = kingpin.Flag("bucket-ulid", "Store bucket ULID as a string").Required().Short('b').String()
 	labelname          = kingpin.Flag("label-name", "If provided, all values for given label name will be printed, otherwise will print all label names").Short('l').String()
+	showStat           = kingpin.Flag("show-stat", "Gather stat such as labels value count and size of all values in bytes").Default("true").Short('s').Bool()
 )
 
 func main() {
-	kingpin.Version("0.0.1")
+	kingpin.Version("0.0.2")
 	kingpin.Parse()
 
 	ctx := context.Background()
@@ -62,6 +63,31 @@ func main() {
 	labelnames, err := reader.LabelNames()
 	if err != nil {
 		panic("can't read label names")
+	}
+
+	if *showStat {
+		type labelStat struct {
+			size      int
+			valuesnum int
+		}
+
+		allStat := make(map[string]labelStat)
+
+		for _, l := range labelnames {
+			lstat := labelStat{}
+			values, err := reader.LabelValues(l)
+			if err != nil {
+				panic("can't get label values")
+			}
+			for _, v := range values {
+				lstat.valuesnum++
+				lstat.size += len([]byte(v))
+			}
+			allStat[l] = lstat
+		}
+		for l, ls := range allStat {
+			fmt.Printf("%s\t%d\t%d\n", l, ls.valuesnum, ls.size)
+		}
 	}
 
 	if *labelname == "" {
